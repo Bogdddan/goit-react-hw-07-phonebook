@@ -45,7 +45,7 @@ export function ContactForm({ onSubmit }) {
           onChange={handleChange}
         />
         <label htmlFor="inputNumber">Number</label>
-        <inpug
+        <input
           type="tel"
           name="number"
           pattern="\+?\d{1,4}?[\-.\s]?\(?\d{1,3}?\)?[\-.\s]?\d{1,4}[\-.\s]?\d{1,4}[\-.\s]?\d{1,9}"
