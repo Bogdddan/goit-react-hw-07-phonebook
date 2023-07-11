@@ -1,64 +1,71 @@
 import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import {
-  fetchContacts,
-  addContact,
-  deleteContact,
-} from '../redux/contactsSlice'; // Зміна імпорту
+
 import { ContactForm } from './ContactForm/contactForm';
 import { Filter } from './Filter/Filter';
 import { ContactList } from './ContactList/ContactList';
-
-import css from './App.module.css';
+import { useDispatch, useSelector } from 'react-redux';
+import { setFilter } from 'redux/filterSlice';
+import {
+  selectСontacts,
+  selectFilter,
+  selectError,
+  selectIsLoading,
+} from 'redux/selectors';
+import { addContact, deleteContact, fetchContacts } from 'redux/operations';
 
 export function App() {
   const dispatch = useDispatch();
-  const contacts = useSelector((state) => state.contacts.items);
-  const filter = useSelector((state) => state.contacts.filter); // Заміна селектора
+  const contacts = useSelector(selectСontacts);
+  const filter = useSelector(selectFilter);
+  const isLoading = useSelector(selectIsLoading);
+  const error = useSelector(selectError);
 
   useEffect(() => {
     dispatch(fetchContacts());
   }, [dispatch]);
 
-  const handleDeleteContact = (contactId) => {
+  const onDeleteContact = contactId => {
     dispatch(deleteContact(contactId));
   };
 
-  const handleAddContact = (name, number) => {
+  const onAddContact = newcontact => {
     if (
-      contacts.find((contact) => contact.name.toLowerCase() === name.toLowerCase())
+      contacts.find(
+        contact => contact.name.toLowerCase() === newcontact.name.toLowerCase()
+      )
     ) {
-      alert(`${name} is already in contacts`);
+      alert(`${newcontact.name} is already in contacts!`);
       return;
     }
 
-    dispatch(addContact({ name, number }));
+    dispatch(addContact(newcontact));
   };
 
-  const handleChangeFilter = (event) => {
-    // Обробка фільтрації
-  };
+  const changeFilter = event => dispatch(setFilter(event.currentTarget.value));
 
-  const getFilteredContacts = () => {
-    // Логіка фільтрації
+  const getFiltredContacts = () => {
+    const normalizedFilter = filter.toLowerCase();
+    return contacts.filter(contact =>
+      contact.name.toLowerCase().includes(normalizedFilter)
+    );
   };
-  const filteredContacts = getFilteredContacts();
+  const filtredContacts = getFiltredContacts();
 
   return (
-    <div className={css.container}>
-      <h1 className={css.name}>Phonebook</h1>
-      <ContactForm onSubmit={handleAddContact} />
+    <>
+      <h1>Phonebook</h1>
+      <ContactForm onSubmit={onAddContact} />
 
-      <h2 className={css.secondName}>Contacts</h2>
-      <Filter value={filter} onChange={handleChangeFilter} />
+      <h2>Contacts</h2>
+      <Filter value={filter} onChange={changeFilter} />
+      {isLoading && !error && <b>Request in progress...</b>}
       <ContactList
-        filteredContacts={filteredContacts}
-        onDeleteContact={handleDeleteContact}
+        filtredContacts={filtredContacts}
+        onDeleteContact={onDeleteContact}
       />
-    </div>
+    </>
   );
 }
-
 
 
 // work code
